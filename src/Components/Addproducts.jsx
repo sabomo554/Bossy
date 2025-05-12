@@ -7,15 +7,28 @@ const Addproducts = () => {
   const [product_cost, setProductCost] = useState("");
   const [product_photo, setProductPhoto] = useState("");
 
-  //feedback states
+  const [adminPassword, setAdminPassword] = useState("");
+
+  // Feedback states
   const [loading, setLoading] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  //submit function
+  const correctAdminPassword = "@ajcsbest$"; // Hardcoded admin password
+
+  // Submit function
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading("connecting...");
+    setError("");
+    setSuccess("");
+
+    if (adminPassword !== correctAdminPassword) {
+      setError("Access denied: Incorrect admin password.");
+      return;
+    }
+
+    setLoading("Connecting...");
+
     try {
       const formData = new FormData();
       formData.append("product_name", product_name);
@@ -26,67 +39,66 @@ const Addproducts = () => {
       const response = await axios.post(
         "https://sabomo.pythonanywhere.com/api/add_product",
         formData
-      );      if (response.data.message) {
-        setSuccess(response.data.message);
+      );
+
+      if (response.data.message) {
+        setSuccess("✅ " + response.data.message);
         setLoading("");
         setProductName("");
-        setProductPhoto("");
         setProductDescription("");
         setProductCost("");
+        setProductPhoto("");
+        setAdminPassword("");
       }
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError("❌ " + err.message);
+      setLoading("");
     }
   };
+
   return (
-    <div className="row justify-content-center mt-4 ">
-      <div className="col-md-6 card shadow p-2  bg-secondary">
-        <h1>WELCOME TO ADD PRODUCTS</h1>
-        {success}
-        {loading}
-        {error}
+    <div className="row justify-content-center mt-4">
+      <div className="col-md-6 card shadow p-4 bg-light">
+        <h2 className="mb-3">🔒 Admin: Add New Product</h2>
+        {loading && <div className="text-info">{loading}</div>}
+        {success && <div className="text-success">{success}</div>}
+        {error && <div className="text-danger">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <input
-            type="text"
-            placeholder="product name"
-            className="form-control"
-            value={product_name}
-            onChange={(e) => {
-              setProductName(e.target.value);
-            }}
+            type="password"
+            placeholder="Enter admin password"
+            className="form-control mb-3"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
           />
-          <br />
+          <input
+            type="text"
+            placeholder="Product name"
+            className="form-control mb-3"
+            value={product_name}
+            onChange={(e) => setProductName(e.target.value)}
+          />
           <textarea
-            name=""
-            id=""
-            placeholder="product description"
-            className="form-control"
+            placeholder="Product description"
+            className="form-control mb-3"
             value={product_description}
-            onChange={(e) => {
-              setProductDescription(e.target.value);
-            }}
-          ></textarea> <br />
+            onChange={(e) => setProductDescription(e.target.value)}
+          />
           <input
             type="number"
-            placeholder="product cost"
-            className="form-control" value={product_cost}
-            onChange={(e) => {
-              setProductCost(e.target.value);
-            }}
+            placeholder="Product cost"
+            className="form-control mb-3"
+            value={product_cost}
+            onChange={(e) => setProductCost(e.target.value)}
           />
-          <br />
           <input
             type="file"
-            placeholder="product photo"
-            className="form-control"
-            onChange={(e) => {
-              setProductPhoto(e.target.files[0]);
-            }}
+            className="form-control mb-3"
+            onChange={(e) => setProductPhoto(e.target.files[0])}
           />
-          <br />
-          <button type="submit" className="btn btn-dark">
-            Add product
+          <button type="submit" className="btn btn-dark w-100">
+            ➕ Add Product
           </button>
         </form>
       </div>
